@@ -1,0 +1,19 @@
+----------------------------------------------------------------------------------------
+WordPress plugin: include custom fields inside a post.
+site: pp19dd.com / twitter.com/pp19dd / pp19dd atgmail.com
+----------------------------------------------------------------------------------------
+This is a shortcode that lets you include RAW html inside posts from its custom fields.
+To use, create a custom field in the post (ex: "my table") and put this in a WP post:
+	[include "my table"].
+	
+If needed, you can perform global includes from other posts this way:
+	[include global="my table"]
+
+Warning/extra feature: shortcodes can be recursive. If you have these custom fields:
+	Name	Value
+	"One"	First sentence.
+	"Two"	Second sentence.
+	"Three"	Test [include one two] ing.
+
+Putting [include three] in a WP post will produce:
+	"Test First sentence. Second sentence. ing."		
