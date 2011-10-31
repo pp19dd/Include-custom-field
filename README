@@ -1,7 +1,9 @@
 ----------------------------------------------------------------------------------------
 WordPress plugin: include custom fields inside a post.
-site: pp19dd.com / twitter.com/pp19dd / pp19dd atgmail.com
+Project page: http://pp19dd.com/wordpress-plugin-include-custom-field/
+Author: pp19dd.com / twitter.com/pp19dd / pp19dd atgmail.com
 ----------------------------------------------------------------------------------------
+
 This is a shortcode that lets you include RAW html inside posts from its custom fields.
 To use, create a custom field in the post (ex: "my table") and put this in a WP post:
 	[include "my table"].
@@ -17,3 +19,17 @@ Warning/extra feature: shortcodes can be recursive. If you have these custom fie
 
 Putting [include three] in a WP post will produce:
 	"Test First sentence. Second sentence. ing."		
+
+
+Changelog
+
+2011-10-31 Version 1.1
+
+* Added a configuration screen
+* Added an option to process shortcodes inside text widgets 
+* Added a PHP command line script to import any STDIN into WP custom field
+
+2011-10-27 Version 1.0
+
+* First version, wheee
+
