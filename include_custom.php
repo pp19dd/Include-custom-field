@@ -3,7 +3,7 @@
 Plugin Name: Include custom field
 Plugin URI: http://pp19dd.com/wordpress-plugin-include-custom-field/
 Description: Shortcode that lets you <strong>[include custom]</strong> fields inside a post. To use: create a custom field (ex: "my table"), put HTML in the value, and reference it in a post as <strong>[include "my table"]</strong>.  You can borrow from another post with <strong>[include global="my table"]</strong>. Caveat/bonus: this is unfiltered HTML, shortcodes can be recursive, so, be careful.
-Version: 1.1
+Version: 1.2
 Author: Dino Beslagic
 Author URI: http://pp19dd.com
 License: No license, use at own risk.
@@ -17,14 +17,17 @@ License: No license, use at own risk.
 	If needed, you can perform global includes from other posts this way:
 		[include global="my table"]
 	
-	Warning/extra feature: shortcodes can be recursive. If you have these custom fields:
+	Warning/extra feature: shortcodes can be recursive (optional).
+	If you have these custom fields:
 		Name	Value
 		"One"	First sentence.
 		"Two"	Second sentence.
 		"Three"	Test [include one two] ing.
 	
 	Putting [include three] in a WP post will produce:
-		"Test First sentence. Second sentence. ing."		
+		"Test First sentence. Second sentence. ing."
+	
+	You can optionally include custom fields inside widgets.
 */
 
 function include_custom_options_init() {
@@ -43,6 +46,10 @@ function include_custom_options_add_page() {
 		'include_custom_options_page'
 	);
 }
+
+// options shared in several places, avoid duplication
+$icf_options = get_option('icf_options');
+
 
 function include_custom_options_page() {
 
@@ -68,11 +75,20 @@ function include_custom_options_page() {
 
 <div style="margin-top:3em">
 <fieldset>
+	<div>
+		<label for="icf_enable_recursive">
+			<input id="icf_enable_recursive" name="icf_options[recursive]" type="checkbox" value="1" <?php checked('1', $options['recursive']); ?> />
+			
+			Enable <strong>recursive</strong> shortcode processing
+		</label>
+	</div>
+	<div>
 	<label for="icf_enable_widget_shortcodes">
 		<input id="icf_enable_widget_shortcodes" name="icf_options[widget_shortcode]" type="checkbox" value="1" <?php checked('1', $options['widget_shortcode']); ?> />
 		
 		Enable shortcodes in plain <strong>Text widgets</strong> <em>(Uses add_filter('widget_text', 'do_shortcode'))</em>
 	</label>
+	</div>
 </fieldset>
 </div>
 <p class="submit">
@@ -84,8 +100,25 @@ function include_custom_options_page() {
 
 }
 
+// whiny error checking routines
+function icf_check_option( $opt, $val ) {
+	global $icf_options;
+	
+	if( 
+		is_array( $icf_options ) &&
+		isset($icf_options[$opt]) && 
+		$icf_options[$opt] == $val
+	) {
+		return( true );
+	} else {
+		return( false );
+	}
+}
+
+// meat and potatoes function
 function shortcode_include_custom_field( $atts, $content=null, $code="" ) {
 	global $post;
+	global $icf_options;
 
 	$html = '';
 	
@@ -120,7 +153,7 @@ function shortcode_include_custom_field( $atts, $content=null, $code="" ) {
 		// post id not found - skip this entry
 		if( is_null( $post_id ) ) continue;
 		
-		// get meta key ($v) from post
+		// get ` key ($v) from post
 		$field = get_post_custom_values( $v, $post_id );
 		
 		// field not found, skip this entry
@@ -129,6 +162,12 @@ function shortcode_include_custom_field( $atts, $content=null, $code="" ) {
 		// return value is always an array, so implode
 		$html .= @implode("", $field);
 	}
+
+	// allow recursive shortcode processing?
+	if( icf_check_option( 'recursive', '1' ) ) {
+		return( do_shortcode($html) );
+	}
+
 	return( $html );
 }
 
@@ -136,18 +175,11 @@ function shortcode_include_custom_field( $atts, $content=null, $code="" ) {
 add_action('admin_init', 'include_custom_options_init' );
 add_action('admin_menu', 'include_custom_options_add_page' );
 
-// meat and potatoes
+// execute meat and potatoes
 add_shortcode( 'include', 'shortcode_include_custom_field' );
 
 // optional widget processing for text widgets
-$icf_options = get_option('icf_options');
-
-// whiny error checking routines
-if(
-	is_array( $icf_options ) &&
-	isset($icf_options['widget_shortcode'] ) && 
-	$icf_options['widget_shortcode'] == '1' 
-) {
+if( icf_check_option( 'widget_shortcode', '1' ) ) {
 	add_filter('widget_text', 'do_shortcode');
 }
 

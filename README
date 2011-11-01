@@ -4,7 +4,9 @@ Project page: http://pp19dd.com/wordpress-plugin-include-custom-field/
 Author: pp19dd.com / twitter.com/pp19dd / pp19dd atgmail.com
 ----------------------------------------------------------------------------------------
 
-This is a shortcode that lets you include RAW html inside posts from its custom fields.
+This is a shortcode that lets you include RAW html inside pages, posts and widgets from 
+its custom fields. 
+
 To use, create a custom field in the post (ex: "my table") and put this in a WP post:
 	[include "my table"].
 	
@@ -22,6 +24,10 @@ Putting [include three] in a WP post will produce:
 
 
 Changelog
+
+2011-11-01 Version 1.2
+
+* Added configuration option for recursive processing
 
 2011-10-31 Version 1.1
 
