@@ -3,7 +3,7 @@
 Plugin Name: Include custom field
 Plugin URI: http://pp19dd.com/wordpress-plugin-include-custom-field/
 Description: Shortcode that lets you <strong>[include custom]</strong> fields inside a post. To use: create a custom field (ex: "my table"), put HTML in the value, and reference it in a post as <strong>[include "my table"]</strong>.  You can borrow from another post with <strong>[include global="my table"]</strong>. Caveat/bonus: this is unfiltered HTML, shortcodes can be recursive, so, be careful.
-Version: 1.2
+Version: 1.3
 Author: Dino Beslagic
 Author URI: http://pp19dd.com
 License: No license, use at own risk.
@@ -52,14 +52,15 @@ $icf_options = get_option('icf_options');
 
 
 function include_custom_options_page() {
-
-	$options = get_option('icf_options');
+	global $icf_options;
 
 ?>
 <div class="wrap">
 <h2>Include Custom Fields Options</h2>
 
-<p>This plugin creates a shortcode that will let you [include] custom fields inside posts, pages and text widgets.  Usage:</p>
+<p>This plugin creates a shortcode that will let you <strong>[include]</strong> custom fields inside posts, pages and text widgets.</p>
+
+<h3>Usage</h3>
 
 <ol>
 	<li>Create a custom field, call it "My Table".</li>
@@ -75,18 +76,31 @@ function include_custom_options_page() {
 
 <div style="margin-top:3em">
 <fieldset>
-	<div>
+
+	<h3>Common options</h3>
+
+	<div style="margin-top:20px">
 		<label for="icf_enable_recursive">
-			<input id="icf_enable_recursive" name="icf_options[recursive]" type="checkbox" value="1" <?php checked('1', $options['recursive']); ?> />
+			<input id="icf_enable_recursive" name="icf_options[recursive]" type="checkbox" value="1" <?php checked('1', $icf_options['recursive']); ?> />
 			
-			Enable <strong>recursive</strong> shortcode processing
+			Enable <strong>recursive</strong> shortcode processing (ex: for nested includes.)
 		</label>
 	</div>
-	<div>
+	
+	<h3>Advanced options</h3>
+	
+	<div style="margin-top:25px">
 	<label for="icf_enable_widget_shortcodes">
-		<input id="icf_enable_widget_shortcodes" name="icf_options[widget_shortcode]" type="checkbox" value="1" <?php checked('1', $options['widget_shortcode']); ?> />
+		<input id="icf_enable_widget_shortcodes" name="icf_options[widget_shortcode]" type="checkbox" value="1" <?php checked('1', $icf_options['widget_shortcode']); ?> />
 		
-		Enable shortcodes in plain <strong>Text widgets</strong> <em>(Uses add_filter('widget_text', 'do_shortcode'))</em>
+		Execute <strong>add_filter('widget_text', 'do_shortcode')</strong> to allow [include] inside Text widgets
+	</label>
+	</div>
+	<div>
+	<label for="icf_enable_filter">
+		<input id="icf_enable_filter" name="icf_options[filter]" type="checkbox" value="1" <?php checked('1', $icf_options['filter']); ?> />
+
+		Execute <strong>add_filter('the_content', 'do_shortcode', -1)</strong> to prioritize shortcodes ahead of content filters (fixes syntax highlighters, etc.)
 	</label>
 	</div>
 </fieldset>
@@ -177,6 +191,11 @@ add_action('admin_menu', 'include_custom_options_add_page' );
 
 // execute meat and potatoes
 add_shortcode( 'include', 'shortcode_include_custom_field' );
+
+// reprioritize shortcode filter?
+if( icf_check_option( 'filter', '1' ) ) {
+	add_filter('the_content', 'do_shortcode', -1);
+}
 
 // optional widget processing for text widgets
 if( icf_check_option( 'widget_shortcode', '1' ) ) {

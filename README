@@ -25,6 +25,10 @@ Putting [include three] in a WP post will produce:
 
 Changelog
 
+2011-11-01 Version 1.3
+
+* Added configuration option for reprioritizing shortcode filter (fixes syntax highlighters, etc.)
+
 2011-11-01 Version 1.2
 
 * Added configuration option for recursive processing
